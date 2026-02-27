@@ -21,12 +21,14 @@ var Version = "dev"
 var staticFiles embed.FS
 
 func main() {
-	// 确定数据根目录（exe 所在目录）
-	exePath, err := os.Executable()
+	// 数据目录固定在 %APPDATA%\ChromeCollect，不随 exe 位置变化
+	appData, err := os.UserConfigDir() // Windows 下返回 %APPDATA%
 	if err != nil {
-		log.Fatal("无法获取 exe 路径:", err)
+		// 兜底：exe 同级目录
+		exe, _ := os.Executable()
+		appData = filepath.Dir(exe)
 	}
-	rootDir := filepath.Dir(exePath)
+	rootDir := filepath.Join(appData, "ChromeCollect")
 
 	// 初始化数据库
 	initDB(rootDir)
