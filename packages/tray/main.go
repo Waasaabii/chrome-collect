@@ -12,6 +12,9 @@ import (
 	"github.com/getlantern/systray"
 )
 
+// 当前版本号（CI 构建时通过 -ldflags "-X main.Version=vX.X.X" 注入）
+var Version = "dev"
+
 // 嵌入前端静态资源
 //
 //go:embed static/*

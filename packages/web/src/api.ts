@@ -35,6 +35,18 @@ export async function fetchStats(): Promise<Stats> {
     return fetch('/api/stats').then(r => r.json())
 }
 
+export interface VersionInfo {
+    current: string
+    latest: string
+    updateAvailable: boolean
+    releasesUrl: string
+    downloadUrl?: string
+}
+
+export async function fetchVersion(): Promise<VersionInfo> {
+    return fetch('/api/version').then(r => r.json())
+}
+
 export async function deleteBookmark(id: string): Promise<void> {
     await fetch(`/api/bookmarks/${id}`, { method: 'DELETE' })
 }

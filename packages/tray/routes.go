@@ -11,8 +11,19 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"sync"
 	"sync/atomic"
 	"time"
+)
+
+// ── 版本检查缓存 ──────────────────────────────────────────────────────────────
+const githubRepo = "Waasaabii/chrome-collect"
+const releasesPage = "https://github.com/" + githubRepo + "/releases/latest"
+
+var (
+	versionCacheMu      sync.Mutex
+	versionCacheResult  map[string]any
+	versionCacheExpires time.Time
 )
 
 // ── 扩展心跳 ──────────────────────────────────────────────────────────────────
@@ -262,6 +273,14 @@ func handleRequest(w http.ResponseWriter, r *http.Request, staticFS fs.FS) {
 		return
 	}
 
+	// ── 版本检查 ──────────────────────────────────────────────────────────────
+
+	// GET /api/version
+	if method == "GET" && path == "/api/version" {
+		writeJSON(w, 200, getVersionInfo())
+		return
+	}
+
 	// ── 扩展心跳 ──────────────────────────────────────────────────────────────
 
 	// POST /api/extension/ping
@@ -386,4 +405,40 @@ func mimeByExt(ext string) string {
 	default:
 		return "application/octet-stream"
 	}
+}
+
+// getVersionInfo 返回当前版本 + GitHub 最新版本（带 1 小时缓存）
+func getVersionInfo() map[string]any {
+	versionCacheMu.Lock()
+	defer versionCacheMu.Unlock()
+
+	if versionCacheResult != nil && time.Now().Before(versionCacheExpires) {
+		return versionCacheResult
+	}
+
+	result := map[string]any{
+		"current":         Version,
+		"latest":          Version,
+		"updateAvailable": false,
+		"releasesUrl":     releasesPage,
+	}
+
+	// 调 GitHub API 获取最新 release
+	client := &http.Client{Timeout: 8 * time.Second}
+	resp, err := client.Get("https://api.github.com/repos/" + githubRepo + "/releases/latest")
+	if err == nil && resp.StatusCode == 200 {
+		defer resp.Body.Close()
+		var release struct {
+			TagName string `json:"tag_name"`
+		}
+		if json.NewDecoder(resp.Body).Decode(&release) == nil && release.TagName != "" {
+			result["latest"] = release.TagName
+			result["updateAvailable"] = release.TagName != Version && Version != "dev"
+			result["downloadUrl"] = "https://github.com/" + githubRepo + "/releases/download/" + release.TagName + "/chrome-collect.exe"
+		}
+	}
+
+	versionCacheResult = result
+	versionCacheExpires = time.Now().Add(1 * time.Hour)
+	return result
 }

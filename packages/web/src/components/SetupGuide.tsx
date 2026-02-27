@@ -14,11 +14,18 @@ export default function SetupGuide() {
                 {/* 步骤 */}
                 <div className="space-y-5">
                     <Step num={1} title="下载扩展">
-                        <a href="/api/extension/download" download
-                            className="btn-primary mt-2 no-underline inline-flex">
+                        <a
+                            href="https://github.com/Waasaabii/chrome-collect/releases/latest/download/extension.zip"
+                            target="_blank"
+                            rel="noreferrer"
+                            className="btn-primary mt-2 no-underline inline-flex"
+                        >
                             <div className="i-lucide-download w-4 h-4" />
                             下载 extension.zip
                         </a>
+                        <p className="text-muted text-xs mt-2">
+                            或前往 <a href="https://github.com/Waasaabii/chrome-collect/releases/latest" target="_blank" rel="noreferrer" className="text-accent hover:underline">GitHub Releases</a> 下载最新版
+                        </p>
                     </Step>
 
                     <Step num={2} title="打开扩展管理页">

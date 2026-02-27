@@ -45,7 +45,7 @@ jobs:
 
       - name: 编译 Go exe
         working-directory: packages/tray
-        run: go build -ldflags="-H windowsgui -s -w" -o ../../dist/chrome-collect.exe .
+        run: go build -ldflags="-H windowsgui -s -w -X main.Version=${{ github.ref_name }}" -o ../../dist/chrome-collect.exe .
 
       - name: 打包 Chrome 扩展
         shell: pwsh
