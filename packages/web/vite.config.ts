@@ -5,7 +5,7 @@ import UnoCSS from 'unocss/vite'
 export default defineConfig({
   plugins: [UnoCSS(), react()],
   build: {
-    outDir: '../server/web/dist',
+    outDir: 'dist',
     emptyOutDir: true,
   },
   server: {
