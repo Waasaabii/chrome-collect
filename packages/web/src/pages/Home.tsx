@@ -35,7 +35,7 @@ function HomeInner() {
     const [groupMode, setGroupMode] = useState<GroupMode>('domain')
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
     const [extensionInstalled, setExtensionInstalled] = useState<boolean | null>(null)
-    const [updateInfo, setUpdateInfo] = useState<VersionInfo | null>(null)
+    const [versionInfo, setVersionInfo] = useState<VersionInfo | null>(null)
 
     // ── 别名编辑 ──────────────────────────────────────────────────
     const [aliasTarget, setAliasTarget] = useState<{ id: string; value: string } | null>(null)
@@ -77,7 +77,7 @@ function HomeInner() {
         loadMain()
         api.checkExtensionInstalled().then(setExtensionInstalled)
         // 检查更新（异步，不影响主流程）
-        api.fetchVersion().then(v => { if (v.updateAvailable) setUpdateInfo(v) }).catch(() => { })
+        api.fetchVersion().then(setVersionInfo).catch(() => { })
     }, [loadMain])
 
     useEffect(() => {
@@ -215,6 +215,16 @@ function HomeInner() {
                         </span>
                     </div>
                     <span className="text-xs text-muted whitespace-nowrap">{stats.total} 条收藏 · {formatSize(stats.totalSize)}</span>
+                    {versionInfo && (
+                        versionInfo.updateAvailable ? (
+                            <a href={versionInfo.downloadUrl || versionInfo.releasesUrl} target="_blank" rel="noreferrer"
+                                className="text-xs bg-accent/15 text-accent px-2 py-0.5 rounded-full no-underline hover:bg-accent/25 transition-colors flex items-center gap-1 whitespace-nowrap">
+                                🆕 {versionInfo.latest}
+                            </a>
+                        ) : (
+                            <span className="text-xs text-muted/50 whitespace-nowrap">{versionInfo.current}</span>
+                        )
+                    )}
                 </div>
 
                 <div className="flex items-center gap-3">
@@ -276,28 +286,6 @@ function HomeInner() {
                     )}
                 </div>
             </header>
-
-            {/* 更新提示条 */}
-            {updateInfo && (
-                <div className="fixed top-16 left-0 right-0 z-90 bg-accent/10 border-b border-accent/30 px-6 py-2 flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-sm">
-                        <div className="i-lucide-arrow-up-circle w-4 h-4 text-accent" />
-                        <span className="text-white">发现新版本 <strong className="text-accent">{updateInfo.latest}</strong>（当前 {updateInfo.current}）</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                        {updateInfo.downloadUrl && (
-                            <a href={updateInfo.downloadUrl} target="_blank" rel="noreferrer"
-                                className="btn-accent text-xs py-1 no-underline">
-                                <div className="i-lucide-download w-3.5 h-3.5" />
-                                下载新版本
-                            </a>
-                        )}
-                        <button className="text-muted hover:text-white transition-colors" onClick={() => setUpdateInfo(null)}>
-                            <div className="i-lucide-x w-4 h-4" />
-                        </button>
-                    </div>
-                </div>
-            )}
 
             {/* 主内容 */}
             <main className="mt-16 p-7 max-w-350 mx-auto">
