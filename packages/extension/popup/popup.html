@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Chrome Collect</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+
+<body>
+  <div class="container">
+    <!-- 顶部 Header -->
+    <div class="header">
+      <div class="logo">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <path d="M5 3h14a1 1 0 011 1v17l-7-3-7 3V4a1 1 0 011-1z" fill="url(#g1)" />
+          <path d="M12 8v5m0 0l-2-2m2 2l2-2" stroke="white" stroke-width="1.5" stroke-linecap="round" />
+          <defs>
+            <linearGradient id="g1" x1="5" y1="3" x2="19" y2="21" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#00d4aa" />
+              <stop offset="1" stop-color="#0099ff" />
+            </linearGradient>
+          </defs>
+        </svg>
+        <span>Chrome Collect</span>
+      </div>
+      <button id="btn-open-manager" class="icon-btn" title="打开管理面板">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" />
+          <polyline points="15 3 21 3 21 9" />
+          <line x1="10" y1="14" x2="21" y2="3" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- 当前页面状态 + 收藏按钮 -->
+    <div class="capture-section">
+      <div class="current-page">
+        <img id="current-favicon" class="favicon" alt="" />
+        <div class="page-info">
+          <div id="current-title" class="page-title">加载中…</div>
+          <div id="current-url" class="page-url"></div>
+        </div>
+        <div id="saved-badge" class="saved-badge hidden">已收藏</div>
+      </div>
+      <button id="btn-capture" class="capture-btn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M5 3h14a1 1 0 011 1v17l-7-3-7 3V4a1 1 0 011-1z" />
+        </svg>
+        <span id="capture-label">收藏当前页</span>
+      </button>
+    </div>
+
+    <!-- 分隔线 + 最近收藏 -->
+    <div class="section-title">最近收藏</div>
+    <div id="recent-list" class="recent-list">
+      <div class="empty-hint">暂无收藏记录</div>
+    </div>
+
+    <!-- 底部状态 -->
+    <div id="status-bar" class="status-bar hidden"></div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+
+</html>

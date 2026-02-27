@@ -1,0 +1,15 @@
+{
+  "name": "chrome-collect",
+  "version": "1.0.0",
+  "description": "浏览器本地收藏插件 - 一键静态化保存网页",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "cd packages/tray && go run .",
+    "build:web": "bun run --cwd packages/web build",
+    "build:ext": "powershell Compress-Archive -Force -Path packages/extension/* -DestinationPath dist/extension.zip",
+    "build:app": "bun run build:web && powershell -Command \"Remove-Item -Recurse -Force packages/tray/static -ErrorAction SilentlyContinue; Copy-Item -Path packages/web/dist -Destination packages/tray/static -Recurse\" && cd packages/tray && go build -ldflags='-H windowsgui -s -w' -o ../../dist/chrome-collect.exe . && cd ../..",
+    "build": "bun run build:app && bun run build:ext"
+  }
+}

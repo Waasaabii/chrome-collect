@@ -1,0 +1,16 @@
+node_modules/
+data/
+*.db
+dist/
+.DS_Store
+Thumbs.db
+
+# Go 构建时复制的前端文件
+packages/tray/static/
+
+# 前端构建产物
+packages/web/dist/
+
+# IDE
+.vscode/
+.idea/

@@ -1,0 +1,82 @@
+name: Build & Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: 构建发布包
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: 安装 Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: 安装 Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+          cache-dependency-path: packages/tray/go.sum
+
+      - name: 安装前端依赖
+        run: bun install
+        working-directory: packages/web
+
+      - name: 构建前端
+        run: bun run build
+        working-directory: packages/web
+
+      - name: 复制前端到 static/
+        shell: pwsh
+        run: |
+          Remove-Item -Recurse -Force packages/tray/static -ErrorAction SilentlyContinue
+          Copy-Item -Path packages/web/dist -Destination packages/tray/static -Recurse
+
+      - name: 编译 Go exe
+        working-directory: packages/tray
+        run: go build -ldflags="-H windowsgui -s -w" -o ../../dist/chrome-collect.exe .
+
+      - name: 打包 Chrome 扩展
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path dist | Out-Null
+          Compress-Archive -Force -Path packages/extension/* -DestinationPath dist/extension.zip
+
+      - name: 上传构建产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: chrome-collect-${{ github.ref_name }}
+          path: |
+            dist/chrome-collect.exe
+            dist/extension.zip
+          retention-days: 30
+
+      - name: 创建 Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Chrome Collect ${{ github.ref_name }}
+          body: |
+            ## 📦 安装说明
+
+            1. **下载 `chrome-collect.exe`** → 双击运行，系统托盘出现书签图标
+            2. **下载 `extension.zip`** → 解压后在 `chrome://extensions/` 加载为已解压扩展
+            3. 点击扩展图标收藏页面，右键托盘图标 → 打开管理界面
+
+            > 数据保存在 exe 同级的 `data/` 目录，不会因升级而丢失。
+          files: |
+            dist/chrome-collect.exe
+            dist/extension.zip
+          draft: false
+          prerelease: false
