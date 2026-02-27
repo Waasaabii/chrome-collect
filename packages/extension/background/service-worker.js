@@ -3,7 +3,7 @@
  * 监听书签创建事件，自动触发页面静态化抓取并发送给本地 Bun 服务
  */
 
-const SERVER_URL = 'http://localhost:3210';
+const SERVER_URL = 'http://localhost:33451';
 const BADGE_TIMEOUT = 3000;
 
 // ── 心跳：定期通知服务端扩展已安装 ────────────────────────────────────────────

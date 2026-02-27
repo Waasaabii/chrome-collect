@@ -2,7 +2,7 @@
  * popup.js — Chrome Collect 弹窗逻辑
  */
 
-const SERVER = 'http://localhost:3210';
+const SERVER = 'http://localhost:33451';
 
 // ── 初始化 ────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {

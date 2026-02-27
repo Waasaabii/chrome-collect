@@ -49,7 +49,7 @@ bun run build:ext   # 输出 dist/extension.zip
 
 双击 `chrome-collect.exe`，系统托盘出现书签图标 🔖
 
-- 右键 → **打开管理界面** → 浏览器打开 `http://localhost:3210`
+- 右键 → **打开管理界面** → 浏览器打开 `http://localhost:33451`
 - 右键 → **退出** → 关闭服务
 
 ### 2. 安装 Chrome 插件

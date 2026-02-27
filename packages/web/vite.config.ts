@@ -11,9 +11,9 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      '/api': 'http://localhost:3210',
-      '/pages': 'http://localhost:3210',
-      '/export': 'http://localhost:3210',
+      '/api': 'http://localhost:33451',
+      '/pages': 'http://localhost:33451',
+      '/export': 'http://localhost:33451',
     },
   },
 })

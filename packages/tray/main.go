@@ -51,8 +51,8 @@ func startHTTP() {
 	}
 
 	mux := newMux(sub)
-	log.Println("[Chrome Collect] 服务已启动 → http://localhost:3210")
-	if err := http.ListenAndServe(":3210", mux); err != nil {
+	log.Println("[Chrome Collect] 服务已启动 → http://localhost:33451")
+	if err := http.ListenAndServe(":33451", mux); err != nil {
 		log.Fatal("HTTP 服务启动失败:", err)
 	}
 }
@@ -69,7 +69,7 @@ func onReady() {
 		for {
 			select {
 			case <-mOpen.ClickedCh:
-				openBrowser("http://localhost:3210")
+				openBrowser("http://localhost:33451")
 			case <-mQuit.ClickedCh:
 				systray.Quit()
 			}
