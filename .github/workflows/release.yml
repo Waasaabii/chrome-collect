@@ -43,6 +43,14 @@ jobs:
           Remove-Item -Recurse -Force packages/tray/static -ErrorAction SilentlyContinue
           Copy-Item -Path packages/web/dist -Destination packages/tray/static -Recurse
 
+      - name: 生成 exe 图标资源
+        working-directory: packages/tray
+        run: |
+          go install github.com/tc-hib/go-winres@latest
+          $gopath = go env GOPATH
+          & "$gopath\bin\go-winres.exe" simply --icon ../extension/icons/icon-128.png
+        shell: pwsh
+
       - name: 编译 Go exe
         working-directory: packages/tray
         run: go build -ldflags="-H windowsgui -s -w -X main.Version=${{ github.ref_name }}" -o ../../dist/chrome-collect.exe .

@@ -1,0 +1,56 @@
+{
+    "RT_GROUP_ICON": {
+        "#1": {
+            "": [
+                "../extension/icons/icon-16.png",
+                "../extension/icons/icon-32.png",
+                "../extension/icons/icon-48.png",
+                "../extension/icons/icon-128.png"
+            ]
+        }
+    },
+    "RT_MANIFEST": {
+        "#1": {
+            "": {
+                "identity": {
+                    "name": "ChromeCollect",
+                    "version": "1.0.0.0"
+                },
+                "description": "Chrome Collect",
+                "minimum-os": "win7",
+                "execution-level": "as invoker",
+                "ui-access": false,
+                "auto-elevate": false,
+                "dpi-awareness": "system",
+                "disable-theming": false,
+                "disable-window-filtering": false,
+                "high-resolution-scrolling-aware": false,
+                "ultra-high-resolution-scrolling-aware": false,
+                "long-path-aware": false,
+                "printer-driver-isolation": false,
+                "gdi-scaling": false,
+                "segment-heap": false,
+                "use-common-controls-v6": false
+            }
+        }
+    },
+    "RT_VERSION": {
+        "#1": {
+            "": {
+                "fixed": {
+                    "file-version": "1.0.0.0",
+                    "product-version": "1.0.0.0"
+                },
+                "info": {
+                    "1033": {
+                        "FileDescription": "Chrome Collect",
+                        "FileVersion": "1.0.0",
+                        "LegalCopyright": "MIT",
+                        "ProductName": "Chrome Collect",
+                        "ProductVersion": "1.0.0"
+                    }
+                }
+            }
+        }
+    }
+}
