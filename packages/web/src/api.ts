@@ -102,3 +102,16 @@ export async function checkExtensionInstalled(): Promise<boolean> {
         return false
     }
 }
+
+// ── 设置 API ──────────────────────────────────────────────────
+export async function fetchAutoStart(): Promise<{ enabled: boolean }> {
+    return fetch('/api/settings/autostart').then(r => r.json())
+}
+
+export async function setAutoStart(enabled: boolean): Promise<void> {
+    await fetch('/api/settings/autostart', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ enabled }),
+    })
+}

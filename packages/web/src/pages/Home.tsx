@@ -37,6 +37,10 @@ function HomeInner() {
     const [extensionInstalled, setExtensionInstalled] = useState<boolean | null>(null)
     const [versionInfo, setVersionInfo] = useState<VersionInfo | null>(null)
 
+    // ── 设置 ──────────────────────────────────────────────────────
+    const [settingsOpen, setSettingsOpen] = useState(false)
+    const [autoStart, setAutoStart] = useState(false)
+
     // ── 别名编辑 ──────────────────────────────────────────────────
     const [aliasTarget, setAliasTarget] = useState<{ id: string; value: string } | null>(null)
 
@@ -78,7 +82,21 @@ function HomeInner() {
         api.checkExtensionInstalled().then(setExtensionInstalled)
         // 检查更新（异步，不影响主流程）
         api.fetchVersion().then(setVersionInfo).catch(() => { })
+        // 获取开机自启状态
+        api.fetchAutoStart().then(r => setAutoStart(r.enabled)).catch(() => { })
     }, [loadMain])
+
+    const handleToggleAutoStart = async () => {
+        const next = !autoStart
+        setAutoStart(next)
+        try {
+            await api.setAutoStart(next)
+            toast.show(next ? '已开启开机自启' : '已关闭开机自启', 'success')
+        } catch {
+            setAutoStart(!next) // 回滚
+            toast.show('设置失败', 'error')
+        }
+    }
 
     useEffect(() => {
         if (viewMode === 'trash') loadTrash()
@@ -276,6 +294,38 @@ function HomeInner() {
                             </span>
                         )}
                     </button>
+
+                    {/* 设置按钮 */}
+                    <div className="relative">
+                        <button
+                            className={`btn-ghost ${settingsOpen ? 'bg-accent/10! border-accent! text-accent!' : ''}`}
+                            onClick={() => setSettingsOpen(v => !v)}
+                        >
+                            <div className="i-lucide-settings w-4 h-4" />
+                        </button>
+                        {settingsOpen && (
+                            <>
+                                <div className="fixed inset-0 z-200" onClick={() => setSettingsOpen(false)} />
+                                <div className="absolute right-0 top-full mt-2 w-64 bg-bg-2 border border-border-2 rounded-3 shadow-xl z-201 p-4">
+                                    <div className="text-sm font-semibold text-white mb-3">设置</div>
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <div className="text-sm text-white">开机自启</div>
+                                            <div className="text-xs text-muted mt-0.5">系统启动时自动运行</div>
+                                        </div>
+                                        <button
+                                            onClick={handleToggleAutoStart}
+                                            className={`relative w-11 h-6 rounded-full transition-colors duration-200 cursor-pointer border-none ${autoStart ? 'bg-accent' : 'bg-bg-3'
+                                                }`}
+                                        >
+                                            <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform duration-200 shadow-sm ${autoStart ? 'translate-x-5' : 'translate-x-0'
+                                                }`} />
+                                        </button>
+                                    </div>
+                                </div>
+                            </>
+                        )}
+                    </div>
 
                     {/* 批量删除 */}
                     {selectedIds.size > 0 && (

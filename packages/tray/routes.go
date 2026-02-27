@@ -273,6 +273,31 @@ func handleRequest(w http.ResponseWriter, r *http.Request, staticFS fs.FS) {
 		return
 	}
 
+	// ── 设置路由 ──────────────────────────────────────────────────────────────
+
+	// GET /api/settings/autostart
+	if method == "GET" && path == "/api/settings/autostart" {
+		writeJSON(w, 200, map[string]any{"enabled": isAutoStartEnabled()})
+		return
+	}
+
+	// PUT /api/settings/autostart
+	if method == "PUT" && path == "/api/settings/autostart" {
+		var body struct {
+			Enabled bool `json:"enabled"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			writeErr(w, 400, "无效请求")
+			return
+		}
+		if err := setAutoStart(body.Enabled); err != nil {
+			writeErr(w, 500, fmt.Sprintf("设置失败: %v", err))
+			return
+		}
+		writeJSON(w, 200, map[string]any{"ok": true, "enabled": body.Enabled})
+		return
+	}
+
 	// ── 版本检查 ──────────────────────────────────────────────────────────────
 
 	// GET /api/version
