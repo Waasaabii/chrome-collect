@@ -5,8 +5,10 @@ dist/
 .DS_Store
 Thumbs.db
 
-# Go 构建时复制的前端文件
+# Go 构建产物
 packages/tray/static/
+*.exe
+*.syso
 
 # 前端构建产物
 packages/web/dist/
