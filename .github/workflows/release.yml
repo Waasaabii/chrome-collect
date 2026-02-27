@@ -46,24 +46,18 @@ jobs:
         include:
           - name: Windows
             os: windows-latest
-            goos: windows
-            goarch: amd64
             out: chrome-collect.exe
             ldflags: '-H windowsgui -s -w'
             winres: true
 
           - name: macOS Intel
-            os: macos-latest
-            goos: darwin
-            goarch: amd64
+            os: macos-13          # Intel runner（x86_64）
             out: chrome-collect-macos-intel
             ldflags: '-s -w'
             winres: false
 
           - name: macOS Apple Silicon
-            os: macos-latest
-            goos: darwin
-            goarch: arm64
+            os: macos-latest      # Apple Silicon runner（arm64）
             out: chrome-collect-macos-arm64
             ldflags: '-s -w'
             winres: false
@@ -99,9 +93,6 @@ jobs:
 
       - name: 编译
         working-directory: packages/tray
-        env:
-          GOOS: ${{ matrix.goos }}
-          GOARCH: ${{ matrix.goarch }}
         run: >
           go build
           -ldflags="${{ matrix.ldflags }} -X main.Version=${{ github.ref_name }}"
