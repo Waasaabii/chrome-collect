@@ -300,8 +300,14 @@ func handleRequest(w http.ResponseWriter, r *http.Request, staticFS fs.FS) {
 
 	// ── 版本检查 ──────────────────────────────────────────────────────────────
 
-	// GET /api/version
+	// GET /api/version?force=1
 	if method == "GET" && path == "/api/version" {
+		if r.URL.Query().Get("force") == "1" {
+			// 清除缓存，强制重新检查
+			versionCacheMu.Lock()
+			versionCacheResult = nil
+			versionCacheMu.Unlock()
+		}
 		writeJSON(w, 200, getVersionInfo())
 		return
 	}

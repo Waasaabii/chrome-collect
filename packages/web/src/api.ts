@@ -47,6 +47,10 @@ export async function fetchVersion(): Promise<VersionInfo> {
     return fetch('/api/version').then(r => r.json())
 }
 
+export async function forceCheckVersion(): Promise<VersionInfo> {
+    return fetch('/api/version?force=1').then(r => r.json())
+}
+
 export async function deleteBookmark(id: string): Promise<void> {
     await fetch(`/api/bookmarks/${id}`, { method: 'DELETE' })
 }

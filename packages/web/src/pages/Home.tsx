@@ -322,6 +322,24 @@ function HomeInner() {
                                                 }`} />
                                         </button>
                                     </div>
+                                    <div className="border-t border-border mt-3 pt-3">
+                                        <button
+                                            onClick={async () => {
+                                                const info = await api.forceCheckVersion()
+                                                setVersionInfo(info)
+                                                if (info.updateAvailable) {
+                                                    toast.show(`发现新版本 ${info.latest}`, 'success')
+                                                } else {
+                                                    toast.show('已是最新版本', 'success')
+                                                }
+                                            }}
+                                            className="btn-ghost w-full text-sm justify-center"
+                                        >
+                                            <div className="i-lucide-refresh-cw w-3.5 h-3.5" />
+                                            检查更新
+                                            {versionInfo && <span className="text-muted text-xs ml-1">当前 {versionInfo.current}</span>}
+                                        </button>
+                                    </div>
                                 </div>
                             </>
                         )}
