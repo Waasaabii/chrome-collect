@@ -42,7 +42,20 @@ export default function ExportView() {
     }, [title])
 
     const handlePrintPDF = () => {
-        iframeRef.current?.contentWindow?.print()
+        if (!html) return
+        // 在新窗口打开 HTML 并打印（绕过 sandbox 限制）
+        const printWin = window.open('', '_blank')
+        if (!printWin) return
+        printWin.document.write(html)
+        printWin.document.close()
+        // 等待资源加载完成后打印
+        printWin.onload = () => {
+            printWin.print()
+        }
+        // 兜底：2 秒后触发打印（某些页面 onload 不触发）
+        setTimeout(() => {
+            try { printWin.print() } catch { }
+        }, 2000)
     }
 
     if (loading) {
