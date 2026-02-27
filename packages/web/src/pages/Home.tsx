@@ -322,7 +322,7 @@ function HomeInner() {
                                                 }`} />
                                         </button>
                                     </div>
-                                    <div className="border-t border-border mt-3 pt-3">
+                                    <div className="border-t border-border mt-3 pt-3 flex flex-col gap-2">
                                         <button
                                             onClick={async () => {
                                                 const info = await api.forceCheckVersion()
@@ -339,6 +339,19 @@ function HomeInner() {
                                             检查更新
                                             {versionInfo && <span className="text-muted text-xs ml-1">当前 {versionInfo.current}</span>}
                                         </button>
+                                        {versionInfo?.updateAvailable && (
+                                            <button
+                                                onClick={async () => {
+                                                    toast.show(`正在下载 ${versionInfo.latest}，完成后将自动重启…`, 'success')
+                                                    await api.triggerUpdate()
+                                                    setSettingsOpen(false)
+                                                }}
+                                                className="btn-ghost w-full text-sm justify-center bg-accent/10! border-accent! text-accent!"
+                                            >
+                                                <div className="i-lucide-download w-3.5 h-3.5" />
+                                                立即更新到 {versionInfo.latest}
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
                             </>

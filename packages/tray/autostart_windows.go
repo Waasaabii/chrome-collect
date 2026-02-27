@@ -1,3 +1,5 @@
+//go:build windows
+
 package main
 
 import (
@@ -24,28 +26,23 @@ func isAutoStartEnabled() bool {
 // setAutoStart 设置或取消开机自启
 func setAutoStart(enable bool) error {
 	if enable {
-		// 获取当前 exe 的绝对路径
 		exePath, err := os.Executable()
 		if err != nil {
 			return err
 		}
-
 		key, _, err := registry.CreateKey(registry.CURRENT_USER, autoStartKeyPath, registry.SET_VALUE)
 		if err != nil {
 			return err
 		}
 		defer key.Close()
-
 		return key.SetStringValue(autoStartValueName, exePath)
 	}
 
-	// 删除注册表项
 	key, err := registry.OpenKey(registry.CURRENT_USER, autoStartKeyPath, registry.SET_VALUE)
 	if err != nil {
-		return nil // 键不存在，无需操作
+		return nil
 	}
 	defer key.Close()
-
 	err = key.DeleteValue(autoStartValueName)
 	if err == registry.ErrNotExist {
 		return nil

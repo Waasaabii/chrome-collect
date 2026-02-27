@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"os/exec"
 	"path/filepath"
 
 	"github.com/getlantern/systray"
@@ -21,10 +20,17 @@ var Version = "dev"
 var staticFiles embed.FS
 
 func main() {
-	// 数据目录固定在 %APPDATA%\ChromeCollect，不随 exe 位置变化
-	appData, err := os.UserConfigDir() // Windows 下返回 %APPDATA%
+	// ── 自更新模式 ──────────────────────────────────────────────
+	// 当以 --update-pid=<pid> --update-target=<path> 启动时，
+	// 扮演 updater 角色：等待旧进程退出 → 覆盖旧 exe → 重启
+	if pid, target, ok := parseUpdaterArgs(); ok {
+		runUpdaterMode(pid, target)
+		return
+	}
+
+	// 数据目录固定在 %APPDATA%/ChromeCollect，不随 exe 位置变化
+	appData, err := os.UserConfigDir()
 	if err != nil {
-		// 兜底：exe 同级目录
 		exe, _ := os.Executable()
 		appData = filepath.Dir(exe)
 	}
@@ -77,9 +83,7 @@ func onReady() {
 	}()
 }
 
-func openBrowser(url string) {
-	exec.Command("rundll32", "url.dll,FileProtocolHandler", url).Start()
-}
+
 
 // getIcon 生成一个 16x16 绿色书签 ICO 图标（内联，无需外部文件）
 func getIcon() []byte {

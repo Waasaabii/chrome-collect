@@ -14,6 +14,8 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"github.com/getlantern/systray"
 )
 
 // ── 版本检查缓存 ──────────────────────────────────────────────────────────────
@@ -295,6 +297,31 @@ func handleRequest(w http.ResponseWriter, r *http.Request, staticFS fs.FS) {
 			return
 		}
 		writeJSON(w, 200, map[string]any{"ok": true, "enabled": body.Enabled})
+		return
+	}
+
+	// ── 自更新 ────────────────────────────────────────────────────────────────
+
+	// POST /api/update
+	if method == "POST" && path == "/api/update" {
+		info := getVersionInfo()
+		downloadURL, _ := info["downloadUrl"].(string)
+		version, _ := info["latest"].(string)
+		if downloadURL == "" || version == "" {
+			writeErr(w, 400, "暂无可用更新")
+			return
+		}
+		writeOK(w) // 先响应，避免客户端等待太久
+		go func() {
+			tmpPath, err := downloadUpdate(downloadURL, version)
+			if err != nil {
+				return
+			}
+			if err := launchUpdater(tmpPath); err != nil {
+				return
+			}
+			systray.Quit()
+		}()
 		return
 	}
 
