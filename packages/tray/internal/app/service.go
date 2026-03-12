@@ -782,12 +782,12 @@ func pickInstallerURL(assets []struct {
 	Name string `json:"name"`
 	URL  string `json:"browser_download_url"`
 }) string {
-	suffix := ".pkg"
-	if runtime.GOOS == "windows" {
-		suffix = ".msi"
+	targetName := installerAssetName()
+	if targetName == "" {
+		return ""
 	}
 	for _, asset := range assets {
-		if strings.HasSuffix(strings.ToLower(asset.Name), suffix) {
+		if strings.EqualFold(asset.Name, targetName) {
 			return asset.URL
 		}
 	}
@@ -795,11 +795,14 @@ func pickInstallerURL(assets []struct {
 }
 
 func downloadInstaller(downloadURL, version string) (string, error) {
-	fileName := fmt.Sprintf("chrome-collect-%s", version)
-	if runtime.GOOS == "windows" {
-		fileName += ".msi"
-	} else {
-		fileName += ".pkg"
+	fileName := installerAssetName()
+	if fileName == "" {
+		fileName = fmt.Sprintf("chrome-collect-%s", version)
+		if runtime.GOOS == "windows" {
+			fileName += ".msi"
+		} else {
+			fileName += ".pkg"
+		}
 	}
 	tmpPath := filepath.Join(os.TempDir(), fileName)
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
@@ -838,4 +841,18 @@ func downloadsDir() (string, error) {
 
 func parseInt64(value string) (int64, error) {
 	return strconv.ParseInt(value, 10, 64)
+}
+
+func installerAssetName() string {
+	switch runtime.GOOS {
+	case "windows":
+		return "chrome-collect-windows-x64.msi"
+	case "darwin":
+		if runtime.GOARCH == "arm64" {
+			return "chrome-collect-macos-arm64.pkg"
+		}
+		return "chrome-collect-macos-x64.pkg"
+	default:
+		return ""
+	}
 }

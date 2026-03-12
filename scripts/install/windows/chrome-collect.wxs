@@ -5,6 +5,7 @@
     Manufacturer="Waasaabii"
     Version="$(var.ProductVersion)"
     UpgradeCode="EF52D49F-CC9A-4EAB-AB5D-5F0D2D31E1A1">
+    <Launch Condition="Installed OR VersionNT &gt;= 1000" Message="Chrome Collect 仅支持 Windows 10 和 Windows 11。" />
     <MajorUpgrade DowngradeErrorMessage="已安装更新版本的 Chrome Collect。" />
     <MediaTemplate EmbedCab="yes" />
 

@@ -36,8 +36,9 @@ Chrome Collect 现在由三部分组成：
 
 | 文件 | 说明 |
 |------|------|
-| `chrome-collect-windows-x64.msi` | Windows 安装包，包含桌面端、Native Host 与 Chrome Native Messaging 注册 |
-| `chrome-collect-macos.pkg` | macOS 安装包，包含桌面端、Native Host 与 Native Messaging 清单 |
+| `chrome-collect-windows-x64.msi` | Windows 10 / 11 x64 安装包，包含桌面端、Native Host 与 Chrome Native Messaging 注册 |
+| `chrome-collect-macos-arm64.pkg` | macOS Apple Silicon 安装包，适用于 M 系列芯片 |
+| `chrome-collect-macos-x64.pkg` | macOS Intel 安装包，适用于 x64 机器 |
 | `chrome-collect-extension.zip` | 固定扩展 ID 的 Chrome 扩展包 |
 
 ### 使用步骤
@@ -142,12 +143,15 @@ bun run dev
 GitHub Actions 在打 tag 后会构建并上传：
 
 - Windows MSI
-- macOS PKG
+- macOS Apple Silicon PKG
+- macOS Intel PKG
 - Chrome 扩展 ZIP
 
 ## 兼容性边界
 
 - 仅支持 Google Chrome
+- Windows 仅支持 Windows 10 / 11 x64
+- macOS 同时支持 Intel x64 与 Apple Silicon
 - 不兼容旧扩展 ID
 - 不兼容旧版 `localhost` 协议
 - 不兼容旧版单文件裸 `exe` 运行方式
