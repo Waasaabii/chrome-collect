@@ -24,6 +24,18 @@ type GroupMode = 'none' | 'domain'
 function HomeInner() {
     const toast = useToast()
 
+    const openExternal = async (url: string) => {
+        try {
+            if (window.chromeCollect?.invoke) {
+                await window.chromeCollect.invoke('shell.openExternal', { url })
+                return
+            }
+            window.open(url, '_blank', 'noopener,noreferrer')
+        } catch {
+            toast.show('无法打开外部链接', 'error')
+        }
+    }
+
     // ── 状态 ──────────────────────────────────────────────────────
     const [items, setItems] = useState<Bookmark[]>([])
     const [trashItems, setTrashItems] = useState<Bookmark[]>([])
@@ -58,7 +70,7 @@ function HomeInner() {
             setItems(bmRes.items)
             setStats(statsRes)
         } catch {
-            toast.show('无法连接到本地服务', 'error')
+            toast.show('无法连接到桌面端', 'error')
         } finally {
             setLoading(false)
         }
@@ -83,7 +95,7 @@ function HomeInner() {
         // 检查更新（异步，不影响主流程）
         api.fetchVersion().then(setVersionInfo).catch(() => { })
         // 获取开机自启状态
-        api.fetchAutoStart().then(r => setAutoStart(r.enabled)).catch(() => { })
+        api.fetchAutoStart().then(r => setAutoStart(Boolean(r.autoStart ?? r.enabled))).catch(() => { })
     }, [loadMain])
 
     const handleToggleAutoStart = async () => {
@@ -210,7 +222,7 @@ function HomeInner() {
             key={item.id}
             item={item}
             selected={selectedIds.has(item.id)}
-            onPreview={() => window.open(`/export/${item.id}`, '_blank')}
+            onPreview={() => { window.location.hash = `#/export/${item.id}` }}
             onDelete={() => handleDelete(item.id)}
             onEditAlias={() => setAliasTarget({ id: item.id, value: item.alias || item.title || '' })}
             onToggleSelect={() => toggleSelect(item.id)}
@@ -235,10 +247,11 @@ function HomeInner() {
                     <span className="text-xs text-muted whitespace-nowrap">{stats.total} 条收藏 · {formatSize(stats.totalSize)}</span>
                     {versionInfo && (
                         versionInfo.updateAvailable ? (
-                            <a href={versionInfo.downloadUrl || versionInfo.releasesUrl} target="_blank" rel="noreferrer"
-                                className="text-xs bg-accent/15 text-accent px-2 py-0.5 rounded-full no-underline hover:bg-accent/25 transition-colors flex items-center gap-1 whitespace-nowrap">
+                            <button
+                                onClick={() => void openExternal(versionInfo.downloadUrl || versionInfo.releasesUrl)}
+                                className="text-xs bg-accent/15 text-accent px-2 py-0.5 rounded-full hover:bg-accent/25 transition-colors flex items-center gap-1 whitespace-nowrap border-none cursor-pointer">
                                 🆕 {versionInfo.latest}
-                            </a>
+                            </button>
                         ) : (
                             <span className="text-xs text-muted/50 whitespace-nowrap">{versionInfo.current}</span>
                         )

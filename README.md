@@ -14,113 +14,144 @@
 
 ---
 
-## ✨ 是什么
+## 是什么
 
-Chrome Collect 由两部分组成：
+Chrome Collect 现在由三部分组成：
 
-- **Chrome 插件**：点击插件图标，一键将当前页面完整静态化（图片/CSS/字体全部 base64 内联），无网络也能完整预览
-- **本地 exe**：轻量系统托盘应用，提供 HTTP 服务 + SQLite 存储 + Web 管理界面，单文件 ~10 MB，无需安装
+- **Chrome 扩展**：负责抓取当前页面、生成静态 HTML、请求桌面端保存。
+- **Desktop App**：系统托盘 + 桌面管理窗口，负责收藏管理、设置、自更新。
+- **Native Host**：通过 Chrome Native Messaging 与扩展通信，不再监听 `localhost` 端口。
 
-## 🚀 下载安装
+这次架构已经彻底移除旧版 HTTP 服务：
 
-### 方式一：直接下载（推荐）
+- 不再使用 `http://localhost:33451`
+- 不再暴露 `/api/*`、`/pages/*`、`/export/*`
+- 不再兼容旧的裸 `exe + 浏览器访问 localhost` 模式
 
-前往 **[Releases](https://github.com/Waasaabii/chrome-collect/releases/latest)** 下载：
+## 安装与使用
+
+### 正式安装包
+
+前往 [GitHub Releases](https://github.com/Waasaabii/chrome-collect/releases/latest) 下载：
 
 | 文件 | 说明 |
 |------|------|
-| `chrome-collect.exe` | 本地服务 + 管理界面（系统托盘）|
-| `extension.zip` | Chrome 插件包 |
+| `chrome-collect-windows-x64.msi` | Windows 安装包，包含桌面端、Native Host 与 Chrome Native Messaging 注册 |
+| `chrome-collect-macos.pkg` | macOS 安装包，包含桌面端、Native Host 与 Native Messaging 清单 |
+| `chrome-collect-extension.zip` | 固定扩展 ID 的 Chrome 扩展包 |
 
-### 方式二：从源码构建
+### 使用步骤
 
-**前置要求**：[Bun](https://bun.sh) ≥ 1.0 · [Go](https://go.dev) ≥ 1.21
+1. 先安装桌面端安装包。
+2. 打开 `chrome://extensions/`，开启开发者模式。
+3. 解压 `chrome-collect-extension.zip`，点击“加载已解压的扩展程序”。
+4. 启动 Chrome Collect Desktop。
+5. 在任意网页点击扩展图标，选择“收藏当前页”。
 
-```bash
-git clone git@github.com:Waasaabii/chrome-collect.git
-cd chrome-collect
-bun run build:app   # 输出 dist/chrome-collect.exe
-bun run build:ext   # 输出 dist/extension.zip
-```
+## 当前架构
 
-## 📖 使用步骤
+### 扩展通信
 
-### 1. 启动本地服务
+- 扩展后台通过 `chrome.runtime.connectNative` 长连到 `com.chrome_collect.native_host`
+- Native Host 通过 `stdin/stdout` 收发版本化 JSON 消息
+- 协议强制校验 `protocolVersion`
+- 新旧桌面端与扩展不做兼容回退
 
-双击 `chrome-collect.exe`，系统托盘出现书签图标 🔖
+### 桌面管理界面
 
-- 右键 → **打开管理界面** → 浏览器打开 `http://localhost:33451`
-- 右键 → **退出** → 关闭服务
+- 管理界面由桌面窗口内嵌 React 页面承载
+- 前端统一通过 `window.chromeCollect.invoke(method, payload)` 调用桌面端
+- 预览、下载 HTML、打开文件夹、检查更新、开机自启都通过桌面桥接完成
 
-### 2. 安装 Chrome 插件
+### 数据存储
 
-1. 解压 `extension.zip`
-2. 打开 `chrome://extensions/` → 开启**开发者模式**
-3. 点击**加载已解压的扩展程序** → 选择解压目录
+- 数据库存储在用户配置目录下的 `ChromeCollect/data/collect.db`
+- HTML 与截图保存在 `ChromeCollect/data/pages/`
+- 删除的收藏进入回收站，7 天后自动清理
 
-### 3. 开始收藏
-
-在任意网页点击扩展图标 → 点击**收藏当前页** → 右上角出现 ✓
-
-## 🛠 功能
+## 功能
 
 | 功能 | 说明 |
 |------|------|
-| **完整静态化** | 图片/CSS/字体/背景图全部 base64 内联，零 404 |
-| **截图缩略图** | 自动截取页面截图作为卡片预览 |
-| **Markdown 备注** | 为每个页面添加支持 Markdown 的备注 |
-| **别名编辑** | 双击卡片标题，自定义显示名称 |
-| **域名分组** | 默认按来源域名分组展示 |
-| **离线预览** | 点击卡片在新标签页预览离线版 |
-| **访问原站** | 预览页提供一键跳转原始网址 |
-| **下载 HTML** | 导出单个自包含 HTML 文件 |
-| **回收站** | 软删除 + 7 天自动清理 |
-| **搜索 / 排序** | 实时搜索标题/URL/备注，按时间或大小排序 |
-| **批量删除** | 多选后一键批量删除 |
+| 完整静态化 | 图片、CSS、字体、背景图内联，离线可读 |
+| 截图缩略图 | 自动截取页面截图作为卡片预览 |
+| 别名与备注 | 支持自定义标题与备注 |
+| 域名分组 | 默认按来源域名聚合展示 |
+| 离线预览 | 在桌面窗口或扩展预览页直接查看保存内容 |
+| 下载 HTML | 导出单个自包含 HTML 文件 |
+| 打开文件夹 | 直接定位本地保存目录 |
+| 回收站 | 软删除与恢复、永久删除、自动清理 |
+| 自更新 | 读取 GitHub Release 并下载安装包 |
 
-## 📁 项目结构
+## 项目结构
 
-```
+```text
 chrome-collect/
 ├── packages/
-│   ├── extension/          # Chrome 插件（Manifest V3）
-│   │   ├── background/     # Service Worker：手动收藏逻辑
-│   │   ├── content/        # capture.js：页面完整内联化
-│   │   └── popup/          # 弹窗界面
-│   ├── tray/               # Go 后端（单 exe）
-│   │   ├── main.go         # 系统托盘 + HTTP 服务器 + embed
-│   │   ├── db.go           # SQLite 数据访问层
-│   │   └── routes.go       # REST API 路由
-│   └── web/                # React 前端（构建后 embed 进 exe）
-├── data/                   # 运行时数据（自动创建）
-│   ├── collect.db          # SQLite 数据库
-│   └── pages/              # 保存的 HTML + 截图（按域名分组）
-└── dist/                   # 构建产物
-    ├── chrome-collect.exe
-    └── extension.zip
+│   ├── extension/                 # Chrome 扩展（Manifest V3 + Native Messaging）
+│   │   ├── background/            # Service Worker
+│   │   ├── content/               # 页面静态化抓取
+│   │   ├── popup/                 # 扩展弹窗
+│   │   ├── preview/               # 扩展内预览页
+│   │   └── shared/                # 协议与传输层
+│   ├── tray/
+│   │   ├── cmd/desktop-app/       # 系统托盘 + WebView 桌面窗口
+│   │   ├── cmd/native-host/       # Chrome Native Messaging Host
+│   │   └── internal/              # 共享服务层与协议定义
+│   └── web/                       # React 管理界面
+├── scripts/install/
+│   ├── windows/                   # MSI 构建脚本与 WiX 清单
+│   └── macos/                     # PKG 构建脚本与 Native Host 清单
+└── dist/                          # 构建产物
 ```
 
-## 🔌 API
+## 从源码构建
 
-| Method | Path | 说明 |
-|--------|------|------|
-| POST | `/api/save` | 保存收藏 |
-| GET | `/api/bookmarks` | 列表（`?q=` 搜索，`?url=` 精确匹配）|
-| GET | `/api/bookmarks/:id` | 单条 |
-| PATCH | `/api/bookmarks/:id` | 更新 `alias` / `notes` |
-| DELETE | `/api/bookmarks/:id` | 软删除 |
-| GET | `/api/stats` | 统计 |
-| GET | `/api/bookmarks/:id/download` | 下载 HTML |
-| POST | `/api/bookmarks/:id/open-folder` | 在资源管理器定位文件 |
-| GET | `/api/trash` | 回收站列表 |
-| POST | `/api/trash/:id/restore` | 恢复 |
-| DELETE | `/api/trash/:id` | 永久删除 |
-| POST | `/api/extension/ping` | 扩展心跳 |
+### 前置要求
 
-## ⭐ Star History
+- [Bun](https://bun.sh) >= 1.0
+- [Go](https://go.dev) >= 1.24
+- Windows 打包需要 [WiX Toolset 4](https://wixtoolset.org/)
+- macOS 打包需要 `pkgbuild`
+- 构建桌面窗口需要启用 CGO，并具备对应平台的 WebView 编译环境
 
-[![Star History Chart](https://api.star-history.com/svg?repos=Waasaabii/chrome-collect&type=Date)](https://star-history.com/#Waasaabii/chrome-collect&Date)
+### 常用命令
 
-## 📄 License
+```bash
+bun install
+bun run build:web
+bun run build:ext
+bun run build:app
+```
+
+安装包构建：
+
+```bash
+bun run build:windows-installer
+bun run build:macos-installer
+```
+
+本地打开桌面管理窗口：
+
+```bash
+bun run dev
+```
+
+## 发布产物
+
+GitHub Actions 在打 tag 后会构建并上传：
+
+- Windows MSI
+- macOS PKG
+- Chrome 扩展 ZIP
+
+## 兼容性边界
+
+- 仅支持 Google Chrome
+- 不兼容旧扩展 ID
+- 不兼容旧版 `localhost` 协议
+- 不兼容旧版单文件裸 `exe` 运行方式
+
+## License
 
 MIT

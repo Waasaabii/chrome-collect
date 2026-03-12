@@ -10,23 +10,18 @@ permissions:
   contents: write
 
 jobs:
-  # ── 第一步：构建前端（只做一次，供所有平台复用）──────────────────────────────
   build-frontend:
     name: 构建前端
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
-
       - name: 安装依赖
         run: bun install
-
       - name: 构建前端
         run: bun run build:web
-
       - name: 上传前端产物
         uses: actions/upload-artifact@v4
         with:
@@ -34,125 +29,116 @@ jobs:
           path: packages/web/dist
           retention-days: 1
 
-  # ── 第二步：matrix 多平台构建 ─────────────────────────────────────────────────
-  build:
-    name: 构建 ${{ matrix.name }}
+  build-windows:
+    name: 构建 Windows 安装包
+    runs-on: windows-latest
     needs: build-frontend
-    runs-on: ${{ matrix.os }}
-
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - name: Windows
-            os: windows-latest
-            out: chrome-collect.exe
-            ldflags: '-H windowsgui -s -w'
-            winres: true
-
-          - name: macOS Intel
-            os: macos-13          # Intel runner（x86_64）
-            out: chrome-collect-macos-intel
-            ldflags: '-s -w'
-            winres: false
-
-          - name: macOS Apple Silicon
-            os: macos-latest      # Apple Silicon runner（arm64）
-            out: chrome-collect-macos-arm64
-            ldflags: '-s -w'
-            winres: false
-
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-go@v5
         with:
-          go-version: '1.21'
+          go-version: '1.24'
           cache-dependency-path: packages/tray/go.sum
-
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: 安装依赖
+        run: bun install
+      - name: 安装 MinGW 工具链
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          update: true
+          install: >-
+            mingw-w64-ucrt-x86_64-gcc
+      - name: 注入 MinGW 到 PATH
+        shell: pwsh
+        run: |
+          echo "C:\msys64\ucrt64\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
       - name: 下载前端产物
         uses: actions/download-artifact@v4
         with:
           name: web-dist
           path: packages/web/dist
-
-      - name: 复制前端到 static/
-        shell: bash
-        run: |
-          rm -rf packages/tray/static
-          cp -r packages/web/dist packages/tray/static
-
-      - name: 生成 exe 图标资源 (仅 Windows)
-        if: matrix.winres
-        working-directory: packages/tray
+      - name: 同步前端资源
+        run: bun run sync:web
+      - name: 安装 WiX
         shell: pwsh
         run: |
-          go install github.com/tc-hib/go-winres@latest
-          $gopath = go env GOPATH
-          & "$gopath\bin\go-winres.exe" simply --icon ../extension/icons/icon-128.png
-
-      - name: 编译
-        working-directory: packages/tray
-        run: >
-          go build
-          -ldflags="${{ matrix.ldflags }} -X main.Version=${{ github.ref_name }}"
-          -o ../../dist/${{ matrix.out }}
-          .
-
-      - name: 上传构建产物
+          dotnet tool install --global wix --version 5.*
+          echo "$env:USERPROFILE\.dotnet\tools" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+      - name: 检查 Windows 构建工具链
+        shell: pwsh
+        run: |
+          gcc --version
+          g++ --version
+          go env CC CXX CGO_ENABLED
+      - name: 构建 Windows 安装包
+        shell: pwsh
+        env:
+          CGO_ENABLED: 1
+        run: powershell -ExecutionPolicy Bypass -File scripts/install/windows/build-msi.ps1
+      - name: 上传 Windows 安装包
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.out }}
-          path: dist/${{ matrix.out }}
+          name: chrome-collect-windows-x64.msi
+          path: dist/chrome-collect-windows-x64.msi
           retention-days: 30
 
-  # ── 第三步：打包扩展 + 发布 Release ──────────────────────────────────────────
-  release:
-    name: 发布 Release
-    needs: build
-    runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/')
-
+  build-macos:
+    name: 构建 macOS 安装包
+    runs-on: macos-latest
+    needs: build-frontend
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+          cache-dependency-path: packages/tray/go.sum
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: 安装依赖
+        run: bun install
+      - name: 下载前端产物
+        uses: actions/download-artifact@v4
+        with:
+          name: web-dist
+          path: packages/web/dist
+      - name: 构建 macOS 安装包
+        env:
+          CGO_ENABLED: 1
+        run: bash scripts/install/macos/build-pkg.sh
+      - name: 上传 macOS 安装包
+        uses: actions/upload-artifact@v4
+        with:
+          name: chrome-collect-macos.pkg
+          path: dist/chrome-collect-macos.pkg
+          retention-days: 30
 
+  release:
+    name: 发布 Release
+    needs: [build-windows, build-macos]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - uses: actions/checkout@v4
       - name: 打包 Chrome 扩展
-        run: zip -r dist/extension.zip packages/extension/
-
-      - name: 下载所有二进制
+        run: |
+          mkdir -p dist
+          cd packages/extension
+          zip -r ../../dist/chrome-collect-extension.zip .
+      - name: 下载所有产物
         uses: actions/download-artifact@v4
         with:
           path: dist
           merge-multiple: true
-
       - name: 创建 Release
         uses: softprops/action-gh-release@v2
         with:
           name: Chrome Collect ${{ github.ref_name }}
           generate_release_notes: true
-          append_body: true
-          body: |
-
-            ---
-
-            ## 📦 安装说明
-
-            ### Windows
-            下载 `chrome-collect.exe` → 双击运行，系统托盘出现书签图标
-
-            ### macOS
-            - Intel Mac：下载 `chrome-collect-macos-intel`
-            - Apple Silicon (M1/M2/M3)：下载 `chrome-collect-macos-arm64`
-            - 首次运行：右键 → 打开（绕过 Gatekeeper）
-
-            ### Chrome 扩展
-            下载 `extension.zip` → 解压后在 `chrome://extensions/` 加载为已解压扩展
-
-            > 数据保存在系统配置目录的 `ChromeCollect/` 文件夹，升级不丢失。
           files: |
-            dist/chrome-collect.exe
-            dist/chrome-collect-macos-intel
-            dist/chrome-collect-macos-arm64
-            dist/extension.zip
-          draft: false
-          prerelease: false
+            dist/chrome-collect-windows-x64.msi
+            dist/chrome-collect-macos.pkg
+            dist/chrome-collect-extension.zip

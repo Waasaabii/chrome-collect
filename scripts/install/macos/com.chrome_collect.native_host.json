@@ -1,0 +1,9 @@
+{
+  "name": "com.chrome_collect.native_host",
+  "description": "Chrome Collect Native Host",
+  "path": "/Applications/Chrome Collect/chrome-collect-native-host",
+  "type": "stdio",
+  "allowed_origins": [
+    "chrome-extension://mnhbnhpoahcpomdlkjhhlijclmoeaokn/"
+  ]
+}

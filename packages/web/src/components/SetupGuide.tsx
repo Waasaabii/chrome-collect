@@ -1,4 +1,16 @@
 export default function SetupGuide() {
+    const openExternal = async (url: string) => {
+        try {
+            if (window.chromeCollect?.invoke) {
+                await window.chromeCollect.invoke('shell.openExternal', { url })
+                return
+            }
+            window.open(url, '_blank', 'noopener,noreferrer')
+        } catch {
+            window.open(url, '_blank', 'noopener,noreferrer')
+        }
+    }
+
     return (
         <div className="min-h-screen bg-bg flex items-center justify-center p-8">
             <div className="max-w-lg w-full">
@@ -14,17 +26,15 @@ export default function SetupGuide() {
                 {/* 步骤 */}
                 <div className="space-y-5">
                     <Step num={1} title="下载扩展">
-                        <a
-                            href="https://github.com/Waasaabii/chrome-collect/releases/latest/download/extension.zip"
-                            target="_blank"
-                            rel="noreferrer"
+                        <button
+                            onClick={() => void openExternal('https://github.com/Waasaabii/chrome-collect/releases/latest/download/chrome-collect-extension.zip')}
                             className="btn-primary mt-2 no-underline inline-flex"
                         >
                             <div className="i-lucide-download w-4 h-4" />
-                            下载 extension.zip
-                        </a>
+                            下载 chrome-collect-extension.zip
+                        </button>
                         <p className="text-muted text-xs mt-2">
-                            或前往 <a href="https://github.com/Waasaabii/chrome-collect/releases/latest" target="_blank" rel="noreferrer" className="text-accent hover:underline">GitHub Releases</a> 下载最新版
+                            或前往 <button onClick={() => void openExternal('https://github.com/Waasaabii/chrome-collect/releases/latest')} className="text-accent hover:underline bg-transparent border-none cursor-pointer p-0">GitHub Releases</button> 下载最新版
                         </p>
                     </Step>
 

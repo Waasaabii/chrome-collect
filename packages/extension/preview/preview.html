@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chrome Collect 预览</title>
+  <link rel="stylesheet" href="preview.css" />
+</head>
+<body>
+  <div class="toolbar">
+    <button id="btn-back" class="ghost">返回</button>
+    <div id="page-title" class="title">加载中…</div>
+    <div class="actions">
+      <button id="btn-source" class="ghost">访问原站</button>
+      <button id="btn-download" class="ghost">下载 HTML</button>
+    </div>
+  </div>
+  <div id="loading" class="state">正在加载预览…</div>
+  <div id="error" class="state hidden">预览加载失败</div>
+  <iframe id="preview-frame" class="frame hidden" sandbox="allow-same-origin allow-modals"></iframe>
+  <script type="module" src="preview.js"></script>
+</body>
+</html>

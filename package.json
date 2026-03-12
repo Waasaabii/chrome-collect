@@ -6,10 +6,15 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "cd packages/tray && go run .",
+    "dev": "bun run build:web && cd packages/tray && go run ./cmd/desktop-app --window",
     "build:web": "bun run --cwd packages/web build",
-    "build:ext": "powershell Compress-Archive -Force -Path packages/extension/* -DestinationPath dist/extension.zip",
-    "build:app": "bun run build:web && powershell -Command \"Remove-Item -Recurse -Force packages/tray/static -ErrorAction SilentlyContinue; Copy-Item -Path packages/web/dist -Destination packages/tray/static -Recurse\" && cd packages/tray && go build -ldflags='-H windowsgui -s -w' -o ../../dist/chrome-collect.exe . && cd ../..",
+    "build:ext": "powershell -Command \"New-Item -ItemType Directory -Force dist | Out-Null; if (Test-Path 'dist/chrome-collect-extension.zip') { Remove-Item 'dist/chrome-collect-extension.zip' -Force }; Compress-Archive -Force -Path 'packages/extension/*' -DestinationPath 'dist/chrome-collect-extension.zip'\"",
+    "sync:web": "powershell -Command \"New-Item -ItemType Directory -Force dist/resources/web | Out-Null; Remove-Item -Recurse -Force 'dist/resources/web/*' -ErrorAction SilentlyContinue; Copy-Item -Path 'packages/web/dist/*' -Destination 'dist/resources/web' -Recurse -Force\"",
+    "build:desktop": "bun run build:web && bun run sync:web && cd packages/tray && go build -ldflags='-H windowsgui -s -w' -o ../../dist/chrome-collect-desktop.exe ./cmd/desktop-app && cd ../..",
+    "build:native-host": "cd packages/tray && go build -ldflags='-s -w' -o ../../dist/chrome-collect-native-host.exe ./cmd/native-host && cd ../..",
+    "build:app": "bun run build:desktop && bun run build:native-host",
+    "build:windows-installer": "powershell -ExecutionPolicy Bypass -File scripts/install/windows/build-msi.ps1",
+    "build:macos-installer": "bash scripts/install/macos/build-pkg.sh",
     "build": "bun run build:app && bun run build:ext"
   }
 }

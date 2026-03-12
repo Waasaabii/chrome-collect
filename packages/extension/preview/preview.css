@@ -1,0 +1,81 @@
+:root {
+  color-scheme: dark;
+  --bg: #0f1117;
+  --panel: rgba(10, 12, 20, 0.92);
+  --border: rgba(255, 255, 255, 0.08);
+  --text: #e8eaf0;
+  --muted: #7a8099;
+  --accent: #00d4aa;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.toolbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 16px;
+  background: var(--panel);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border);
+  z-index: 10;
+}
+
+.title {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--muted);
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+.ghost {
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  border-radius: 999px;
+  padding: 8px 14px;
+  cursor: pointer;
+}
+
+.ghost:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.state {
+  padding-top: 96px;
+  text-align: center;
+  color: var(--muted);
+}
+
+.hidden {
+  display: none;
+}
+
+.frame {
+  width: 100%;
+  height: calc(100vh - 48px);
+  margin-top: 48px;
+  border: 0;
+  background: white;
+}

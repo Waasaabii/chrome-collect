@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+  <Package
+    Name="Chrome Collect"
+    Manufacturer="Waasaabii"
+    Version="$(var.ProductVersion)"
+    UpgradeCode="EF52D49F-CC9A-4EAB-AB5D-5F0D2D31E1A1">
+    <MajorUpgrade DowngradeErrorMessage="已安装更新版本的 Chrome Collect。" />
+    <MediaTemplate EmbedCab="yes" />
+
+    <StandardDirectory Id="ProgramFiles64Folder">
+      <Directory Id="INSTALLDIR" Name="Chrome Collect" />
+    </StandardDirectory>
+
+    <Feature Id="MainFeature" Title="Chrome Collect" Level="1">
+      <ComponentGroupRef Id="AppFiles" />
+      <ComponentGroupRef Id="WebFiles" />
+      <ComponentRef Id="NativeHostRegistry" />
+    </Feature>
+  </Package>
+
+  <Fragment>
+    <ComponentGroup Id="AppFiles" Directory="INSTALLDIR">
+      <Component Guid="A5D09E20-BF95-4B60-8A32-39AA2D95E5A1">
+        <File Source="dist\chrome-collect-desktop.exe" KeyPath="yes" />
+      </Component>
+      <Component Guid="4F1D8436-85E8-4E7E-BFF1-9B4FC0C9E201">
+        <File Source="dist\chrome-collect-native-host.exe" KeyPath="yes" />
+      </Component>
+      <Component Guid="D7C6F366-2A43-468D-B4DD-EA73410F84AA">
+        <File Source="scripts\install\windows\chrome-collect-host.json" KeyPath="yes" />
+      </Component>
+    </ComponentGroup>
+  </Fragment>
+
+  <Fragment>
+    <DirectoryRef Id="INSTALLDIR">
+      <Directory Id="WEBROOT" Name="resources">
+        <Directory Id="WEBDIR" Name="web" />
+      </Directory>
+    </DirectoryRef>
+  </Fragment>
+
+  <Fragment>
+    <ComponentGroup Id="WebFiles" Directory="WEBDIR">
+      <Files Include="dist\resources\web\**" />
+    </ComponentGroup>
+  </Fragment>
+
+  <Fragment>
+    <Component Id="NativeHostRegistry" Directory="INSTALLDIR" Guid="28A36D0E-9588-49A8-A521-38AF070C2451">
+      <RegistryValue
+        Root="HKLM"
+        Key="Software\Google\Chrome\NativeMessagingHosts\com.chrome_collect.native_host"
+        Type="string"
+        Value="[INSTALLDIR]chrome-collect-host.json"
+        KeyPath="yes" />
+    </Component>
+  </Fragment>
+</Wix>

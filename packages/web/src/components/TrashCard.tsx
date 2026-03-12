@@ -14,8 +14,8 @@ export default function TrashCard({ item, onRestore, onPermanentDelete }: Props)
     return (
         <div className="card-base group opacity-70 hover:opacity-100 hover:border-danger/30">
             {/* 缩略图 */}
-            {item.thumb_path ? (
-                <img src={`/pages/${item.id}.png`} alt="" loading="lazy"
+            {item.thumb_data_url ? (
+                <img src={item.thumb_data_url} alt="" loading="lazy"
                     className="w-full h-40 object-cover block bg-bg-3 grayscale-50 group-hover:grayscale-0 transition-all" />
             ) : (
                 <div className="w-full h-40 bg-gradient-to-br from-bg-3 to-bg-4 flex items-center justify-center grayscale-50 group-hover:grayscale-0 transition-all">

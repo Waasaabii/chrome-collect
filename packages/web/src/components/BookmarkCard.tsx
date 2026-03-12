@@ -22,8 +22,8 @@ export default function BookmarkCard({ item, selected, onPreview, onDelete, onEd
             onClick={onPreview}
         >
             {/* 缩略图 */}
-            {item.thumb_path ? (
-                <img src={`/pages/${item.id}.png`} alt="" loading="lazy"
+            {item.thumb_data_url ? (
+                <img src={item.thumb_data_url} alt="" loading="lazy"
                     className="w-full h-40 object-cover block bg-bg-3" />
             ) : (
                 <div className="w-full h-40 bg-gradient-to-br from-bg-3 to-bg-4 flex items-center justify-center">
