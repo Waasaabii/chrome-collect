@@ -1,6 +1,6 @@
 {
   "name": "chrome-collect",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "浏览器本地收藏插件 - 一键静态化保存网页",
   "workspaces": [
     "packages/*"
