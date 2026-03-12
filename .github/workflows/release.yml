@@ -83,6 +83,7 @@ jobs:
         with:
           name: chrome-collect-windows-x64.msi
           path: dist/chrome-collect-windows-x64.msi
+          if-no-files-found: error
           retention-days: 30
 
   build-macos:
@@ -114,6 +115,7 @@ jobs:
         with:
           name: chrome-collect-macos.pkg
           path: dist/chrome-collect-macos.pkg
+          if-no-files-found: error
           retention-days: 30
 
   release:

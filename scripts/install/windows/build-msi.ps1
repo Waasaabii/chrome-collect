@@ -8,7 +8,7 @@ function Get-AppVersion {
   if ($env:CHROME_COLLECT_VERSION) {
     return $env:CHROME_COLLECT_VERSION.TrimStart("v")
   }
-  if ($env:GITHUB_REF_NAME) {
+  if ($env:GITHUB_REF_NAME -and $env:GITHUB_REF_NAME -match '^v?\d+\.\d+\.\d+([-.][0-9A-Za-z.-]+)?$') {
     return $env:GITHUB_REF_NAME.TrimStart("v")
   }
   return (Get-Content package.json | ConvertFrom-Json).version
@@ -19,6 +19,9 @@ function Convert-ToMsiVersion([string]$version) {
   $parts = $clean.Split(".")
   while ($parts.Count -lt 4) {
     $parts += "0"
+  }
+  if ($parts[0..3] | Where-Object { $_ -notmatch '^\d+$' }) {
+    throw "Invalid MSI version source: $version"
   }
   return ($parts[0..3] -join ".")
 }
