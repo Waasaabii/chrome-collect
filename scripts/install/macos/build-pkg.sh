@@ -16,8 +16,10 @@ HOST_DIR="$STAGE_DIR/Library/Google/Chrome/NativeMessagingHosts"
 rm -rf "$STAGE_DIR"
 mkdir -p "$APP_DIR/resources/web" "$HOST_DIR"
 
-GOOS=darwin GOARCH=arm64 CGO_ENABLED=1 go build -ldflags="-s -w -X main.Version=$APP_VERSION" -o "$APP_DIR/chrome-collect-desktop" ./packages/tray/cmd/desktop-app
-GOOS=darwin GOARCH=arm64 go build -ldflags="-s -w -X main.Version=$APP_VERSION" -o "$APP_DIR/chrome-collect-native-host" ./packages/tray/cmd/native-host
+pushd "$ROOT_DIR/packages/tray" >/dev/null
+GOOS=darwin GOARCH=arm64 CGO_ENABLED=1 go build -ldflags="-s -w -X main.Version=$APP_VERSION" -o "$APP_DIR/chrome-collect-desktop" ./cmd/desktop-app
+GOOS=darwin GOARCH=arm64 go build -ldflags="-s -w -X main.Version=$APP_VERSION" -o "$APP_DIR/chrome-collect-native-host" ./cmd/native-host
+popd >/dev/null
 
 cp -R packages/web/dist/. "$APP_DIR/resources/web/"
 cp scripts/install/macos/com.chrome_collect.native_host.json "$HOST_DIR/com.chrome_collect.native_host.json"

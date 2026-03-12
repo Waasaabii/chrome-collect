@@ -28,12 +28,12 @@ $msiVersion = Convert-ToMsiVersion $appVersion
 
 $wix = Get-Command wix -ErrorAction SilentlyContinue
 if (-not $wix) {
-  throw "未找到 WiX v4 CLI（wix）。请先安装 WiX Toolset 4。"
+  throw "WiX v4 CLI (wix) was not found. Please install WiX Toolset 4 first."
 }
 
 $gcc = Get-Command gcc -ErrorAction SilentlyContinue
 if (-not $gcc) {
-  throw "未找到 gcc。桌面端 WebView 构建需要可用的 MinGW/MSYS2 工具链。"
+  throw "gcc was not found. Desktop WebView build requires an available MinGW/MSYS2 toolchain."
 }
 
 New-Item -ItemType Directory -Force dist | Out-Null
