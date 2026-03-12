@@ -48,4 +48,4 @@ go build -ldflags="-s -w -X main.Version=$appVersion" -o ..\..\dist\chrome-colle
 Pop-Location
 
 New-Item -ItemType Directory -Force dist | Out-Null
-wix build scripts/install/windows/chrome-collect.wxs -arch x64 -d ProductVersion=$msiVersion -o dist/chrome-collect-windows-x64.msi
+wix build scripts/install/windows/chrome-collect.wxs -arch x64 -d ProductVersion=$msiVersion -d RepoRoot=$root -o dist/chrome-collect-windows-x64.msi

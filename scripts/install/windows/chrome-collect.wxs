@@ -22,13 +22,13 @@
   <Fragment>
     <ComponentGroup Id="AppFiles" Directory="INSTALLDIR">
       <Component Guid="A5D09E20-BF95-4B60-8A32-39AA2D95E5A1">
-        <File Source="dist\chrome-collect-desktop.exe" KeyPath="yes" />
+        <File Source="$(var.RepoRoot)\dist\chrome-collect-desktop.exe" KeyPath="yes" />
       </Component>
       <Component Guid="4F1D8436-85E8-4E7E-BFF1-9B4FC0C9E201">
-        <File Source="dist\chrome-collect-native-host.exe" KeyPath="yes" />
+        <File Source="$(var.RepoRoot)\dist\chrome-collect-native-host.exe" KeyPath="yes" />
       </Component>
       <Component Guid="D7C6F366-2A43-468D-B4DD-EA73410F84AA">
-        <File Source="scripts\install\windows\chrome-collect-host.json" KeyPath="yes" />
+        <File Source="$(var.RepoRoot)\scripts\install\windows\chrome-collect-host.json" KeyPath="yes" />
       </Component>
     </ComponentGroup>
   </Fragment>
@@ -43,7 +43,7 @@
 
   <Fragment>
     <ComponentGroup Id="WebFiles" Directory="WEBDIR">
-      <Files Include="dist\resources\web\**" />
+      <Files Include="$(var.RepoRoot)\dist\resources\web\**" />
     </ComponentGroup>
   </Fragment>
 
