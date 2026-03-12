@@ -2,7 +2,7 @@
     "manifest_version": 3,
     "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAxvUaHepJLNq4Lj0inrCYDn/A8hwe7H6QcdcqaGEvI/0lwTf6E4BhpgGpLUDA4957sx3spgyqVYYIfBR3oRKhdfHVT/ZCUE/mEqSExpxu8+n0PuvzDkej36jUnn6Q4NSRZQiNBPZzTNPpTx6hIjFqi+XXXVV2T4o9ky0SFu0npvdaac9UhYm2OchqG3kawvQuIq/o6gbZjiePd15YCzxgXCVUGVNM8pNNTVBZ7BbjGRYWrarjLFDBfFdQO/wVEg4Fkh4UMaiJoaXQ7oix18iJ0WU30TtJuNm0wvhSWqyURSgsEeOc9+S2an6Bz/HxqEb09RFJbdKO039f5V66MynbFQIDAQAB",
     "name": "Chrome Collect",
-    "version": "1.0.0",
+    "version": "2.0.0",
     "description": "收藏书签时自动将网页完整静态化保存到本地",
     "permissions": [
         "bookmarks",
